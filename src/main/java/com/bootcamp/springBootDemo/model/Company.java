@@ -1,33 +1,33 @@
-package com.bootcamp.springBootDemo;
+package com.bootcamp.springBootDemo.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Company {
 
-    private Long id;
+    private Integer id;
     private String name;
     private List<Employee> employees = new ArrayList<>();
 
     public Company() {
     }
 
-    public Company(Long id, String name) {
+    public Company(Integer id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Company(Long id, String name, List<Employee> employees) {
+    public Company(Integer id, String name, List<Employee> employees) {
         this.id = id;
         this.name = name;
         this.employees = employees;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
