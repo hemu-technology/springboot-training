@@ -40,6 +40,20 @@ public class EmployeeController {
         return employeeService.getAllEmployee();
     }
 
+//    @PutMapping("/{id}")
+//    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Employee request) {
+//        try {
+//            return ResponseEntity.ok(employeeService.updateEmployee(id, request));
+//        } catch (NotFoundException e) {
+//            return ResponseEntity
+//                    .status(HttpStatus.NOT_FOUND)
+//                    .body(Map.of(
+//                            "message", "The employee has left the company and cannot be modified.",
+//                            "error", e.getMessage()
+//                    ));
+//        }
+//    }
+
     @PutMapping("/{id}")
     public Employee update(@PathVariable Integer id, @RequestBody Employee request) {
         return employeeService.updateEmployee(id, request);

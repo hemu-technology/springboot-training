@@ -2,6 +2,7 @@ package com.bootcamp.springBootDemo.service;
 
 import com.bootcamp.springBootDemo.exception.InactiveEmployeeException;
 import com.bootcamp.springBootDemo.exception.InvalidEmployeeException;
+import com.bootcamp.springBootDemo.exception.NotFoundException;
 import com.bootcamp.springBootDemo.model.Employee;
 import com.bootcamp.springBootDemo.model.Gender;
 import com.bootcamp.springBootDemo.repository.EmployeeRepository;
@@ -110,6 +111,22 @@ public class EmployeeServiceTest {
         InactiveEmployeeException ex = assertThrows(InactiveEmployeeException.class,
                 () -> employeeService.updateEmployee(1, update));
         assertEquals("Cannot update inactive employee.", ex.getMessage());
+    }
+
+    @Test
+    void should_throw_exception_when_updating_an_non_exist_employee() {
+        // given
+        Employee employee = new Employee(1, "non-exist", 40, Gender.FEMALE, 26000.0);
+        employee.setActive(false);
+        when(employeeRepository.getById(1)).thenReturn(employee);
+
+        Employee update = new Employee(null, "NewName", 40, Gender.FEMALE, 26000.0);
+
+        // when
+        // then
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> employeeService.updateEmployee(2, update));
+        assertEquals("Employee with id " + 2 + " not found.", ex.getMessage());
     }
 
     @Test

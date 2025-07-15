@@ -2,6 +2,7 @@ package com.bootcamp.springBootDemo.service;
 
 import com.bootcamp.springBootDemo.exception.InactiveEmployeeException;
 import com.bootcamp.springBootDemo.exception.InvalidEmployeeException;
+import com.bootcamp.springBootDemo.exception.NotFoundException;
 import com.bootcamp.springBootDemo.model.Employee;
 import com.bootcamp.springBootDemo.model.Gender;
 import com.bootcamp.springBootDemo.repository.EmployeeRepository;
@@ -47,7 +48,7 @@ public class EmployeeService {
         //get original employee
         Employee preEmployee = employeeRepository.getById(id);
         if (preEmployee == null) {
-            return null;
+            throw new NotFoundException("Employee with id " + id + " not found.");
         }
         if (!preEmployee.getActive()) {
             throw new InactiveEmployeeException("Cannot update inactive employee.");
@@ -59,7 +60,6 @@ public class EmployeeService {
         Double salary = request.getSalary() == null ? preEmployee.getSalary() : request.getSalary();
         Employee newEmployee = new Employee(id, name, age, gender, salary);
         return employeeRepository.update(newEmployee);
-
     }
 
     public void deleteEmployeeById(Integer id) {
