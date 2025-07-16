@@ -81,4 +81,9 @@ public class EmployeeInMemoryRepository implements  EmployeeRepository {
     public List<Employee> getByPageSize(Integer pageNumber, Integer pageSize) {
         return employees.stream().skip((long) (pageNumber - 1) * pageSize).limit(pageSize).toList();
     }
+
+    @Override
+    public List<Employee> getEmployeesByCompanyId(Integer companyId) {
+        return List.of();
+    }
 }

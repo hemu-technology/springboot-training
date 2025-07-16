@@ -4,6 +4,8 @@ import com.bootcamp.springBootDemo.model.Company;
 import com.bootcamp.springBootDemo.model.Employee;
 import com.bootcamp.springBootDemo.repository.CompanyDBRepository;
 import com.bootcamp.springBootDemo.repository.CompanyRepository;
+import com.bootcamp.springBootDemo.repository.EmployeeDBRepository;
+import com.bootcamp.springBootDemo.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,8 +15,11 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
 
-    public CompanyService(CompanyDBRepository companyDBRepository) {
+    private  final EmployeeRepository employeeRepository;
+
+    public CompanyService(CompanyDBRepository companyDBRepository, EmployeeDBRepository employeeRepository) {
         this.companyRepository = companyDBRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     public Company getCompanyById(Integer id) {
@@ -44,7 +49,7 @@ public class CompanyService {
     }
 
     public List<Employee> getEmployeesById(Integer id) {
-        return companyRepository.getEmployeesById(id);
+        return employeeRepository.getEmployeesByCompanyId(id);
     }
 
     public List<Company> getAllByPageSize(Integer pageNumber, Integer pageSize) {

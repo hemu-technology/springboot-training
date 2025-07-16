@@ -50,4 +50,9 @@ public class EmployeeDBRepository implements EmployeeRepository {
     public List<Employee> getByPageSize(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber - 1, pageSize)).getContent();
     }
+
+    @Override
+    public List<Employee> getEmployeesByCompanyId(Integer id) {
+        return repository.getEmployeesByCompanyId(id);
+    }
 }

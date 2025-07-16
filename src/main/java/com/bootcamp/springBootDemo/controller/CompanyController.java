@@ -1,7 +1,11 @@
 package com.bootcamp.springBootDemo.controller;
 
+import com.bootcamp.springBootDemo.controller.dto.CompanyRequest;
+import com.bootcamp.springBootDemo.controller.dto.CompanyResponse;
+import com.bootcamp.springBootDemo.controller.dto.EmployeeResponse;
+import com.bootcamp.springBootDemo.controller.mapper.CompanyMapper;
+import com.bootcamp.springBootDemo.controller.mapper.EmployeeMapper;
 import com.bootcamp.springBootDemo.model.Company;
-import com.bootcamp.springBootDemo.model.Employee;
 import com.bootcamp.springBootDemo.service.CompanyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,30 +18,36 @@ public class CompanyController {
 
     private final CompanyService companyService;
 
-    public CompanyController(CompanyService companyService) {
+    private final CompanyMapper companyMapper;
+    private final EmployeeMapper employeeMapper;
+
+    public CompanyController(CompanyService companyService, CompanyMapper companyMapper, EmployeeMapper employeeMapper) {
         this.companyService = companyService;
+        this.companyMapper = companyMapper;
+        this.employeeMapper = employeeMapper;
     }
 
-
     @GetMapping("/{id}")
-    public Company getById(@PathVariable Integer id) {
-        return companyService.getCompanyById(id);
+    public CompanyResponse getById(@PathVariable Integer id) {
+        return companyMapper.toResponse(companyService.getCompanyById(id));
     }
 
     @GetMapping
-    public List<Company> getAll() {
-        return companyService.getAllCompany();
+    public List<CompanyResponse> getAll() {
+        return companyMapper.toResponse(companyService.getAllCompany());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Company create(@RequestBody Company request) {
-        return companyService.saveCompany(request);
+    public CompanyResponse create(@RequestBody CompanyRequest request) {
+        Company company = companyMapper.toEntity(request);
+        return companyMapper.toResponse(companyService.saveCompany(company));
     }
 
     @PutMapping("/{id}")
-    public Company update(@PathVariable Integer id, @RequestBody Company request) {
-        return companyService.updateCompany(id, request);
+    public CompanyResponse update(@PathVariable Integer id, @RequestBody CompanyRequest request) {
+        Company company = companyMapper.toEntity(request);
+        return companyMapper.toResponse(companyService.updateCompany(id, company));
     }
 
     @DeleteMapping(path = {"/{id}"})
@@ -47,13 +57,13 @@ public class CompanyController {
     }
 
     @GetMapping("/{id}/employees")
-    public List<Employee> getEmployeesById(@PathVariable Integer id) {
-        return companyService.getEmployeesById(id);
+    public List<EmployeeResponse> getEmployeesById(@PathVariable Integer id) {
+        return employeeMapper.toResponse(companyService.getEmployeesById(id));
     }
 
     @GetMapping(params = {"pageNumber", "pageSize"})
-    public List<Company> getAllByPageSize(@RequestParam Integer pageNumber,
-                                          @RequestParam Integer pageSize) {
-        return companyService.getAllByPageSize(pageNumber, pageSize);
+    public List<CompanyResponse> getAllByPageSize(@RequestParam Integer pageNumber,
+                                                  @RequestParam Integer pageSize) {
+        return companyMapper.toResponse(companyService.getAllByPageSize(pageNumber, pageSize));
     }
 }

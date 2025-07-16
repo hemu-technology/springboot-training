@@ -20,4 +20,6 @@ public interface EmployeeRepository {
     void deleteById(Integer id);
 
     List<Employee> getByPageSize(Integer pageNumber, Integer pageSize);
+
+    List<Employee> getEmployeesByCompanyId(Integer companyId);
 }
