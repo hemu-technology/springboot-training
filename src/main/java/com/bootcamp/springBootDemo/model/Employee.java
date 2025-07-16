@@ -1,6 +1,5 @@
 package com.bootcamp.springBootDemo.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
@@ -22,12 +21,20 @@ public class Employee {
 
     private Boolean active = true;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id")
-    @JsonIgnoreProperties("employees")
-    private Company company;
+    //    @ManyToOne
+//    @JoinColumn(name = "company_id")
+//    @JsonIgnoreProperties("employees")
+//    private Company company;
+    private Integer companyId;
 
     public Employee() {
+    }
+
+    public Employee(Integer id, String name, Integer age, Gender gender) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
     }
 
     public Employee(Integer id, String name, Integer age, Gender gender, Double salary) {
@@ -38,14 +45,14 @@ public class Employee {
         this.salary = salary;
     }
 
-    public Employee(Integer id, String name, Integer age, Gender gender, Double salary, Boolean active, Company company) {
+    public Employee(Integer id, String name, Integer age, Gender gender, Double salary, Boolean active, Integer companyId) {
         this.id = id;
         this.name = name;
         this.age = age;
         this.gender = gender;
         this.salary = salary;
         this.active = active;
-        this.company = company;
+        this.companyId = companyId;
     }
 
     public Integer getId() {
@@ -96,11 +103,19 @@ public class Employee {
         this.active = active;
     }
 
-    public Company getCompany() {
-        return company;
+//    public Company getCompany() {
+//        return company;
+//    }
+//
+//    public void setCompany(Company company) {
+//        this.company = company;
+//    }
+
+    public Integer getCompanyId() {
+        return companyId;
     }
 
-    public void setCompany(Company company) {
-        this.company = company;
+    public void setCompanyId(Integer companyId) {
+        this.companyId = companyId;
     }
 }

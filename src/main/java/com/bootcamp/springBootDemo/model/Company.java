@@ -14,8 +14,10 @@ public class Company {
     private Integer id;
     private String name;
 
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+//    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(orphanRemoval = true)
+    @JoinColumn(name = "companyId")
+//    @JsonManagedReference
     private List<Employee> employees;
 
     public Company() {

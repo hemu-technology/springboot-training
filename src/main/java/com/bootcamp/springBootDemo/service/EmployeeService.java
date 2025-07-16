@@ -56,12 +56,16 @@ public class EmployeeService {
             throw new InactiveEmployeeException("Cannot update inactive employee.");
         }
 
-        String name = request.getName() == null ? preEmployee.getName() : request.getName();
-        Integer age = request.getAge() == null ? preEmployee.getAge() : request.getAge();
-        Gender gender = request.getGender() == null ? preEmployee.getGender() : request.getGender();
-        Double salary = request.getSalary() == null ? preEmployee.getSalary() : request.getSalary();
-        Employee newEmployee = new Employee(id, name, age, gender, salary);
-        return employeeRepository.update(newEmployee);
+        if (request.getName() != null) {
+            preEmployee.setName(request.getName());
+        }
+        if(request.getAge() != null) {
+            preEmployee.setAge(request.getAge());
+        }
+        if(request.getGender() != null) {
+            preEmployee.setGender(request.getGender());
+        }
+        return employeeRepository.update(preEmployee);
     }
 
     public void deleteEmployeeById(Integer id) {
