@@ -7,6 +7,7 @@ import com.bootcamp.springBootDemo.controller.mapper.EmployeeMapper;
 import com.bootcamp.springBootDemo.model.Employee;
 import com.bootcamp.springBootDemo.model.Gender;
 import com.bootcamp.springBootDemo.service.EmployeeService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,7 @@ public class EmployeeController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public EmployeeResponse create(@RequestBody EmployeeCreateRequest request) {
+    public EmployeeResponse create(@Valid @RequestBody EmployeeCreateRequest request) {
         Employee employee = employeeMapper.toEntity(request);
         return employeeMapper.toResponse(employeeService.saveEmployee(employee));
     }
