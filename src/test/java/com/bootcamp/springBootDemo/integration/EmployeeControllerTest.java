@@ -1,4 +1,4 @@
-package com.bootcamp.springBootDemo.controller;
+package com.bootcamp.springBootDemo.integration;
 
 import com.bootcamp.springBootDemo.model.Employee;
 import com.bootcamp.springBootDemo.model.Gender;
