@@ -40,34 +40,20 @@ public class EmployeeController {
     }
 
     @GetMapping(params = {"gender"})
-    public List<Employee> getByGender(@RequestParam("gender") String genderParam) {
+    public List<EmployeeResponse> getByGender(@RequestParam("gender") String genderParam) {
         Gender gender = Gender.valueOf(genderParam.toUpperCase());
-        return employeeService.getEmployeeByGender(gender);
+        return employeeMapper.toResponse(employeeService.getEmployeeByGender(gender));
     }
 
     @GetMapping
-    public List<Employee> getAll() {
-        return employeeService.getAllEmployee();
+    public List<EmployeeResponse> getAll() {
+        return employeeMapper.toResponse(employeeService.getAllEmployee());
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Employee request) {
-//        try {
-//            return ResponseEntity.ok(employeeService.updateEmployee(id, request));
-//        } catch (NotFoundException e) {
-//            return ResponseEntity
-//                    .status(HttpStatus.NOT_FOUND)
-//                    .body(Map.of(
-//                            "message", "The employee has left the company and cannot be modified.",
-//                            "error", e.getMessage()
-//                    ));
-//        }
-//    }
-
     @PutMapping("/{id}")
-    public Employee update(@PathVariable Integer id, @RequestBody EmployeeUpdateRequest request) {
+    public EmployeeResponse update(@PathVariable Integer id, @RequestBody EmployeeUpdateRequest request) {
         Employee employee = employeeMapper.toEntity(request);
-        return employeeService.updateEmployee(id, employee);
+        return employeeMapper.toResponse(employeeService.updateEmployee(id, employee));
     }
 
     @DeleteMapping("/{id}")

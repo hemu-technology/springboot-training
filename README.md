@@ -1,87 +1,156 @@
-# Spring Boot Employee API Error Handling - Teaching Outline
+# Spring Boot Demo - DTO & Mapping Layer Isolation
 
-## 🎯 Goal
+## 🎯 Objective
 
-Teach students how to handle exceptions in a Spring Boot application using both **local try-catch** and **global exception handler** with `@RestControllerAdvice`.
+In this module, we demonstrate how to **hide sensitive data** and **decouple internal entity structure** using **DTO (
+Data Transfer Object)** and **Mapper** classes.
 
 ---
 
-## ✅ Step 1: Handle the scenario when the employee does not exist during update
+## ✅ Requirements
+
+### 📌 Hiding `salary` in response
+
+1. **Create** `EmployeeResponse` (exclude salary)
+2. **Create** `EmployeeMapper.toResponse(Employee)`
+3. **Refactor** `EmployeeService` usages in:
+
+    * `create`
+    * `update`
+    * `getById`
+    * `getAll`
+
+### 📌 Remove `id` from request
+
+1. **Create** `EmployeeCreateRequest` and `EmployeeUpdateRequest` (no ID field)
+2. **Map** to entity using `EmployeeMapper.toEntity(EmployeeRequest)`
+3. **Refactor** `EmployeeService` usages in:
+
+    * `create`
+    * `update`
+
+### 📌 Add libs for validation
+
+```xml
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+```
+
+---
+
+## 🔄 DTO Classes
+
+### `EmployeeCreateRequest.java`
 
 ```java
-public Employee updateEmployee(Integer id, Employee request) {
-    Employee preEmployee = employeeRepository.getById(id);
-    if (preEmployee == null) {
-        throw new NotFoundException("Employee with id " + id + " not found.");
+public class EmployeeCreateRequest extends EmployeeRequest {
+    @NotBlank(message = "Name can not be blank")
+    private String name;
+
+    @Min(value = 18)
+    @Max(value = 65)
+    private Integer age;
+
+    @NotNull
+    private Gender gender;
+
+    private Double salary;
+    private Integer companyId;
+    // Getters & Setters
+}
+```
+
+### `EmployeeUpdateRequest.java`
+
+```java
+public class EmployeeUpdateRequest extends EmployeeRequest {
+    private String name;
+    private Integer age;
+    private Gender gender;
+    // Getters & Setters
+}
+```
+
+### `EmployeeResponse.java`
+
+```java
+public class EmployeeResponse {
+    private Integer id;
+    private String name;
+    private Integer age;
+    private Gender gender;
+    private Integer companyId;
+    // Getters & Setters
+}
+```
+
+---
+
+## 🔄 Mapper Class
+
+### `EmployeeMapper.java`
+
+```java
+
+@Component
+public class EmployeeMapper {
+    public Employee toEntity(EmployeeRequest request) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(request, employee);
+        return employee;
     }
-    if (!preEmployee.getActive()) {
-        throw new InactiveEmployeeException("Cannot update inactive employee.");
+
+    public EmployeeResponse toResponse(Employee employee) {
+        EmployeeResponse response = new EmployeeResponse();
+        BeanUtils.copyProperties(employee, response);
+        return response;
     }
 
-    String name = request.getName() == null ? preEmployee.getName() : request.getName();
-    Integer age = request.getAge() == null ? preEmployee.getAge() : request.getAge();
-    Gender gender = request.getGender() == null ? preEmployee.getGender() : request.getGender();
-    Double salary = request.getSalary() == null ? preEmployee.getSalary() : request.getSalary();
-    Employee newEmployee = new Employee(id, name, age, gender, salary);
-    return employeeRepository.update(newEmployee);
-    
-    // unit test
-
-    @Test
-    void should_throw_exception_when_updating_an_non_exist_employee() {
-        // given
-        Employee employee = new Employee(1, "non-exist", 40, Gender.FEMALE, 26000.0);
-        employee.setActive(false);
-        when(employeeRepository.getById(1)).thenReturn(employee);
-
-        Employee update = new Employee(null, "NewName", 40, Gender.FEMALE, 26000.0);
-
-        // when
-        // then
-        NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> employeeService.updateEmployee(2, update));
-        assertEquals("Employee with id " + 2 + " not found.", ex.getMessage());
+    public List<EmployeeResponse> toResponse(List<Employee> employees) {
+        return employees.stream().map(this::toResponse).toList();
     }
 }
 ```
 
-### 📚 Explanation:
-
-* `throw new NotFoundException(...)`: Triggers a business-specific exception when employee does not exist.
-* `throw new InactiveEmployeeException(...)`: Additional rule: inactive employees cannot be updated.
-
 ---
 
-## ✅ Step 2: Local try-catch handling in Controller
+## 💻 Controller Usage
+
+### `EmployeeController.java`
 
 ```java
+
+@PostMapping
+@ResponseStatus(HttpStatus.CREATED)
+public EmployeeResponse create(@Valid @RequestBody EmployeeCreateRequest request) {
+    Employee employee = employeeMapper.toEntity(request);
+    return employeeMapper.toResponse(employeeService.saveEmployee(employee));
+}
+
+@GetMapping("/{id}")
+public EmployeeResponse getById(@PathVariable Integer id) {
+    return employeeMapper.toResponse(employeeService.getEmployeeById(id));
+}
+
+@GetMapping(params = {"pageNumber", "pageSize"})
+public List<EmployeeResponse> getAllByPageSize(@RequestParam Integer pageNumber, @RequestParam Integer pageSize) {
+    return employeeMapper.toResponse(employeeService.getAllByPageSize(pageNumber, pageSize));
+}
+
 @PutMapping("/{id}")
-public ResponseEntity<?> update(@PathVariable Integer id, @RequestBody Employee request) {
-    try {
-        return ResponseEntity.ok(employeeService.updateEmployee(id, request));
-    } catch (NotFoundException e) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(Map.of(
-                        "message", "The employee has left the company and cannot be modified.",
-                        "error", e.getMessage()
-                ));
-    }
+public Employee update(@PathVariable Integer id, @RequestBody EmployeeUpdateRequest request) {
+    Employee employee = employeeMapper.toEntity(request);
+    return employeeService.updateEmployee(id, employee);
 }
 ```
 
-### 📚 Explanation:
-
-* `@PutMapping`: Binds HTTP PUT request to this method.
-* `@PathVariable`: Injects the employee ID from the URL.
-* `@RequestBody`: Maps request JSON to an Employee object.
-* `ResponseEntity`: A Spring helper to control status and body in the HTTP response.
-
----
-
-## ✅ Step 3: Global Exception Handling with @RestControllerAdvice
+### `GlobalExceptionHandler.java`
 
 ```java
+
 package com.bootcamp.springBootDemo.advice;
 
 import com.bootcamp.springBootDemo.exception.InactiveEmployeeException;
@@ -89,69 +158,48 @@ import com.bootcamp.springBootDemo.exception.InvalidEmployeeException;
 import com.bootcamp.springBootDemo.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<?> handleNotFoundException(NotFoundException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(Map.of(
-                        "message", "Resource not found.",
-                        "error", ex.getMessage(),
-                        "timestamp", LocalDateTime.now()
-                ));
-    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, Object> response = new HashMap<>();
 
-    @ExceptionHandler(InactiveEmployeeException.class)
-    public ResponseEntity<?> handleInactiveEmployeeException(InactiveEmployeeException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "message", "The employee has left the company and cannot be modified.",
-                        "error", ex.getMessage(),
-                        "timestamp", LocalDateTime.now()
-                ));
-    }
+        Map<String, String> fieldErrors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            fieldErrors.put(error.getField(), error.getDefaultMessage());
+        }
 
-    @ExceptionHandler(InvalidEmployeeException.class)
-    public ResponseEntity<?> handleInvalidEmployeeException(InvalidEmployeeException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(Map.of(
-                        "message", "The employee information is invalid.",
-                        "error", ex.getMessage(),
-                        "timestamp", LocalDateTime.now()
-                ));
-    }
+        response.put("message", "Validation failed");
+        response.put("errors", fieldErrors);
+        response.put("timestamp", LocalDateTime.now());
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGeneralException(Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of(
-                        "message", "Internal system error.",
-                        "error", ex.getMessage(),
-                        "timestamp", LocalDateTime.now()
-                ));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
 ```
 
-### 📚 Explanation of Annotations:
+---
 
-* `@RestControllerAdvice`: Indicates this class will globally handle exceptions thrown by any controller.
-* `@ExceptionHandler(XxxException.class)`: Handles exceptions of specific types and maps them to HTTP responses.
-* `ResponseEntity`: Customizes HTTP status and response body.
+## 🧪 Suggested Exercises (For Class)
+
+* 🔨 Add custom mapping logic in `EmployeeMapper` (e.g., handle default companyId)
+* ❌ Throw validation error when age is below 18 or missing gender
+* 🧪 Write integration tests using DTO
 
 ---
 
-## 🧠 Suggested Class Activities:
+## 💡 Key Takeaways
 
-1. Globally handle **InactiveEmployeeException** and **InvalidEmployeeException**
+* **DTOs** protect internal model exposure
+* **Mappers** decouple domain from presentation layer
+* This pattern improves **security**, **flexibility**, and **testability**

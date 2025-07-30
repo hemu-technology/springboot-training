@@ -49,14 +49,11 @@ public class EmployeeTest {
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[0].name").value(givenEmployees.get(0).getName()));
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[0].age").value(givenEmployees.get(0).getAge()));
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[0].gender").value(givenEmployees.get(0).getGender().name()));
-        perform.andExpect(MockMvcResultMatchers.jsonPath("$.[0].salary").value(givenEmployees.get(0).getSalary()));
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[1].id").value(givenEmployees.get(1).getId()));
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[2].id").value(givenEmployees.get(2).getId()));
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[3].id").value(givenEmployees.get(3).getId()));
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[4].id").value(givenEmployees.get(4).getId()));
     }
-
-    // please implement the rest of employee apis
 
     @Test
     public void should_create_employee_when_post_employee_given_valid_request() throws Exception {
@@ -80,9 +77,7 @@ public class EmployeeTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Alice Cooper"))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.age").value(30))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.gender").value("FEMALE"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.salary").value(25000.0))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.active").value(true));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.gender").value("FEMALE"));
     }
 
     @Test
@@ -92,8 +87,7 @@ public class EmployeeTest {
                     {
                         "name": "John Smith",
                         "age": 35,
-                        "gender": "MALE",
-                        "salary": 5500.0
+                        "gender": "MALE"
                     }
                 """;
 
@@ -104,8 +98,7 @@ public class EmployeeTest {
 
         // then
         result.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.age").value(35))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.salary").value(5500.0));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.age").value(35));
     }
 
     @Test
