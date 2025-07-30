@@ -17,7 +17,7 @@ import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class EmployeeControllerTest {
+public class EmployeeTest {
 
     @Autowired
     private MockMvc client;
@@ -55,6 +55,65 @@ public class EmployeeControllerTest {
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[3].id").value(givenEmployees.get(3).getId()));
         perform.andExpect(MockMvcResultMatchers.jsonPath("$.[4].id").value(givenEmployees.get(4).getId()));
     }
-}
 
-// please implement the rest of employee apis
+    // please implement the rest of employee apis
+
+    @Test
+    public void should_create_employee_when_post_employee_given_valid_request() throws Exception {
+        // given
+        String newEmployeeJson = """
+                    {
+                        "name": "Alice Cooper",
+                        "age": 30,
+                        "gender": "FEMALE",
+                        "salary": 25000.0
+                    }
+                """;
+
+        // when
+        ResultActions result = client.perform(MockMvcRequestBuilders.post("/employees")
+                .contentType("application/json")
+                .content(newEmployeeJson));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Alice Cooper"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.age").value(30))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.gender").value("FEMALE"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.salary").value(25000.0))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.active").value(true));
+    }
+
+    @Test
+    public void should_update_employee_when_put_employee_given_valid_id() throws Exception {
+        // given
+        String updateJson = """
+                    {
+                        "name": "John Smith",
+                        "age": 35,
+                        "gender": "MALE",
+                        "salary": 5500.0
+                    }
+                """;
+
+        // when
+        ResultActions result = client.perform(MockMvcRequestBuilders.put("/employees/1")
+                .contentType("application/json")
+                .content(updateJson));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.age").value(35))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.salary").value(5500.0));
+    }
+
+    @Test
+    public void should_delete_employee_when_delete_employee_given_valid_id() throws Exception {
+        // when
+        ResultActions result = client.perform(MockMvcRequestBuilders.delete("/employees/1"));
+
+        // then
+        result.andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+}
