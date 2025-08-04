@@ -1,3 +1,9 @@
+name: Deploy to Railway (Production)
+
+on:
+  push:
+    branches: [mapper-and-validation]
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
