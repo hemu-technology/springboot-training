@@ -1,9 +1,3 @@
-name: Deploy to Railway (Production)
-
-on:
-  push:
-    branches: [mapper-and-validation]
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -18,6 +12,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Set environment variables
+        run: |
+          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
 
       - name: Build with Maven using production profile
         run: mvn clean package -Pprod
