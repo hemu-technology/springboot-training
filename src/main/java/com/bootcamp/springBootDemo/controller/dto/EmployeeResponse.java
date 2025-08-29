@@ -1,26 +1,23 @@
-package com.bootcamp.springBootDemo;
+package com.bootcamp.springBootDemo.controller.dto;
 
-public class Employee {
+import com.bootcamp.springBootDemo.model.Gender;
 
-    private Long id;
+public class EmployeeResponse {
+    private Integer id;
     private String name;
     private Integer age;
     private Gender gender;
-    private Double salary;
+    //    private Double salary; // it's sensitive data, should not pass to client
+    private Integer companyId;
 
-    public Employee(Long id, String name, Integer age, Gender gender, Double salary) {
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.gender = gender;
-        this.salary = salary;
+    public EmployeeResponse() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -48,11 +45,11 @@ public class Employee {
         this.gender = gender;
     }
 
-    public Double getSalary() {
-        return salary;
+    public Integer getCompanyId() {
+        return companyId;
     }
 
-    public void setSalary(Double salary) {
-        this.salary = salary;
+    public void setCompanyId(Integer companyId) {
+        this.companyId = companyId;
     }
 }
